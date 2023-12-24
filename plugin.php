@@ -2,7 +2,7 @@
 /*
     Plugin Name: Shay Easy Timeline
     Description: Save me from figuring this out manually time and again
-    Version: 1.0.13
+    Version: 1.0.19
     Author: Shay Pottle
     Author URI: https://shaypottle.com
     License: MIT
@@ -12,6 +12,9 @@
 if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly.
 }
+
+session_start();
+
 
 class ShayEasyTimeline {
     
@@ -41,11 +44,11 @@ class ShayEasyTimeline {
         add_menu_page(
             'Shay Easy Timeline', // Page title
             'Shay Easy Timeline', // Menu title
-            'manage_options',               // Capability
+            'manage_options', // Capability
             'shay-easy-timeline', // Menu slug
             array($this, 'display_admin_page'), // Callback function to display page content
             'dashicons-clock',
-            99                              // Menu position
+            99 // Menu position
         );
     }
     
@@ -68,7 +71,6 @@ class ShayEasyTimeline {
     public function handle_timeline_form() {
         global $wpdb;
 
-
         if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'handle_timeline_form_nonce')) {
             echo 'Form failed!<br>';
             wp_die('Security check failed');
@@ -81,19 +83,13 @@ class ShayEasyTimeline {
             $timeline_title = sanitize_text_field($_POST['timeline_title']);
             $wpdb->insert($table_name, array('timeline_title' => $timeline_title), array('%s'));
         }
-        // Handle form data
-        // $form_data = isset($_POST['form_data']) ? sanitize_text_field($_POST['form_data']) : '';
-        // // "display_date": "",
-        // // "safe_date": "",
-        // // "title": "",
-        // // "description": "",
-        // // "order": 0
-
-        // // Process form data (save to the database, send emails, etc.)
         
-        $redirect_url = add_query_arg('shay_timeline_form_submitted', 'true', wp_get_referer());
-        wp_safe_redirect($redirect_url);
+
+        $_SESSION['success'] = 'Form submitted successfully';
+        
+        wp_safe_redirect(wp_get_referer());
         exit;
+    
     }
 
     public function create_timeline_table() {
@@ -113,15 +109,40 @@ class ShayEasyTimeline {
         dbDelta($sql);
     }
 
-    public function drop_table() {
+    public function create_timeline_single_table() {
         global $wpdb;
-        $table_name = $wpdb->prefix . 'pws_timelines';
-        $wpdb->query("DROP TABLE IF EXISTS $table_name");
+        
+        $table_name = $wpdb->prefix . 'pws_timelines_single';    
+        $charset_collate = $wpdb->get_charset_collate();
+    
+        $sql = "CREATE TABLE $table_name (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            timeline_id int NOT NULL,
+            display_date varchar(255),
+            safe_date varchar(255),
+            description varchar(255),
+            order int NOT NULL DEFAULT 0,
+            PRIMARY KEY  (id)
+        ) $charset_collate;";
+    
+    
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+        dbDelta($sql);
+    }
+
+    public function drop_tables() {
+        global $wpdb;
+
+        $pws_timelines = $wpdb->prefix . 'pws_timelines';
+        $wpdb->query("DROP TABLE IF EXISTS $pws_timelines");
+
+        $pws_timelines_single = $wpdb->prefix . 'pws_timelines_single';        
+        $wpdb->query("DROP TABLE IF EXISTS $pws_timelines_single");
+
     }
     
 }
 
-// Instantiate your plugin class.
 $your_plugin_instance = new ShayEasyTimeline();
 
 
@@ -129,10 +150,11 @@ $your_plugin_instance = new ShayEasyTimeline();
 
 register_activation_hook(__FILE__, array('ShayEasyTimeline', 'activate'));
 register_activation_hook(__FILE__, array('ShayEasyTimeline', 'create_timeline_table'));
+register_activation_hook(__FILE__, array('ShayEasyTimeline', 'create_timeline_single_table'));
 
 
 
 register_deactivation_hook(__FILE__, array('ShayEasyTimeline', 'deactivate'));
 register_uninstall_hook(__FILE__, array('ShayEasyTimeline', 'uninstall'));
-register_uninstall_hook(__FILE__, array('ShayEasyTimeline', 'drop_table'));
+register_uninstall_hook(__FILE__, array('ShayEasyTimeline', 'drop_tables'));
 

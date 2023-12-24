@@ -22,6 +22,10 @@
     cursor: pointer;
 }
 
+.timeline-btn{
+    padding: 5px 15px;
+}
+
 .pws-timeline-table {
     font-family: arial, sans-serif;
     border-collapse: collapse;
@@ -37,4 +41,11 @@
 
 .pws-timeline-table tr:nth-child(even) {
     background-color: #dddddd;
+}
+
+.success-message{
+    background: green;
+    padding: 15px 30px;
+    color: #fff;
+    margin-bottom: 15px;
 }
