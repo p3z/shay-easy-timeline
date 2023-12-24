@@ -1,0 +1,40 @@
+.hide{
+    display: none !important;
+}
+
+.wrap {
+    background-color: #f4f4f4;
+    padding: 20px;
+}
+
+.pws-create-timeline-form{
+    display: flex;
+    flex-direction: column;
+    width: 33%;
+    margin: 30px 0;
+}
+
+.pws-btn{
+    padding: 10px 30px;
+    /* background: rgba(); */
+    font-weight: 700;
+    max-width: 35%;
+    cursor: pointer;
+}
+
+.pws-timeline-table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+    margin: 30px 0;
+}
+
+.pws-timeline-table td, .pws-timeline-table th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+
+.pws-timeline-table tr:nth-child(even) {
+    background-color: #dddddd;
+}
